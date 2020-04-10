@@ -57,26 +57,31 @@ for s in strings:
         else:
             lang='en'
         if lang==detect(s.split(" ",1)[1]):
+            s=s.strip()
+            print(s)
+            print(s.split(" ",1)[1])
             strings_in_lang.append( (  s.split(" ",1)[0] , s.split(" ",1)[1] ) )
-            texts.append
-print(strings_in_lang)
+            texts.append(s.split(" ",1)[1])
+# print(strings_in_lang)
+print(texts)
 
+exit()
 #TFIDF THING
 
-texts= [
-    'My love for you have dissappeared',
-    'Window resize changes the default settings',
-    'Clicking the button yields an exception',
-    'Button clicks cause exceptions',
-    'When I click the button, an error occurs',
-    'Button listener not found for on click event',
-    'File save option greyed out after edits',
-    'Font size cannot be changed after save',
-    'Dialog window won\'t close after update',
-    'Cursor disappears when selecting multiple options',
-    'Cannot regain focus after clicking outside window',
-    'I do not love you any more',
-]
+# texts= [
+#     'My love for you have dissappeared',
+#     'Window resize changes the default settings',
+#     'Clicking the button yields an exception',
+#     'Button clicks cause exceptions',
+#     'When I click the button, an error occurs',
+#     'Button listener not found for on click event',
+#     'File save option greyed out after edits',
+#     'Font size cannot be changed after save',
+#     'Dialog window won\'t close after update',
+#     'Cursor disappears when selecting multiple options',
+#     'Cannot regain focus after clicking outside window',
+#     'I do not love you any more',
+# ]
 
 def create_bow(text):
     """ Returns an list of preporcessed words in bytes, according to:
