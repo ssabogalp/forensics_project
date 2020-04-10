@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from control_predictor import ControlPredictor
-from emo_utils import *
+from utils import *
 
 #Relative imports can only be performed in a package. So, run the code as a package.
 #IMPORTANT! so you have to run your code as python3 -m deep_learning_layer.test_predictor
@@ -20,5 +20,4 @@ def test_pretrained_embedding_layer(self):
 
 c=ControlPredictor()
 c.train(5,10)
-print("HOLALALALA")
 print(c.predict("Good job",10))

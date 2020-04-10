@@ -2,7 +2,7 @@
 #TODOS: show graph in training
 #
 
-from emo_utils import *
+from utils import *
 import numpy as np
 from keras.models import Model
 from keras.layers import Dense, Input, Dropout, LSTM, Activation

@@ -15,8 +15,6 @@ from nltk.stem.porter import *
 
 syns = wordnet.synsets("big")
 
-
-
 synonyms = []
 antonyms = []
 
@@ -30,37 +28,38 @@ print(set(synonyms))
 
 
 
-# parser = argparse.ArgumentParser(description='Process some integers.')
-# parser.add_argument('integers', metavar='N', type=int, nargs='+',
-#                    help='an integer for the accumulator')
-# parser.add_argument('--sum', dest='accumulate', action='store_const',
-#                    const=sum, default=max,
-#                    help='sum the integers (default: find the max)')
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Process some integers.')
+    parser.add_argument('file_path',  help='Path of the file that will be search for strings in language')
+    parser.add_argument("-L",'--lang',  help='sentence to input')
+    parser.add_argument("-Q",'--query',  help='sentence to input')
+    parser.add_argument("-V", "--version", help="show program version", action="store_true")
+    return parser.parse_args()
 
-# parser.add_argument("-V", "--version", help="show program version", action="store_true")
+args = parse_arguments()
+print(args.query)
 
-# args = parser.parse_args()
-
-
-# print(args.accumulate(args.integers))
-
-# if args.version:
-#     print("This is myprogram version 0.1")
-
-# print(detect("War doesn't show who's right, just who's left."))
-
-# print(detect("Ein, zwei, drei, vier"))
-
-#DETERMINE LANGUE+AGE OF EACH SENTENCE.
-process = subprocess.Popen(["strings","--radix=x","a.txt"], stdout=subprocess.PIPE)
+#EXECUTE STRINGS COMMAND
+process = subprocess.Popen(["strings","--radix=x",args.file_path], stdout=subprocess.PIPE)
 stdout = process.communicate()[0]
+ 
 
+#DETERMINE LANGUAGE OF EACH SENTENCE.
+texts=[]
 strings = str(stdout).replace("      ","").replace("     ","").split("\\n") 
-print(strings)
+#print(strings)
+strings_in_lang=[]
 for s in strings:
     if len(s.split(" "))>1:
-        print(s.split(" ",1)[1])
-        print(detect(s.split(" ",1)[1]))
+        #print(s.split(" ",1)[1])
+        if args.lang:
+            lang=args.lang
+        else:
+            lang='en'
+        if lang==detect(s.split(" ",1)[1]):
+            strings_in_lang.append( (  s.split(" ",1)[0] , s.split(" ",1)[1] ) )
+            texts.append
+print(strings_in_lang)
 
 #TFIDF THING
 
