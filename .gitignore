@@ -1,3 +1,4 @@
 Bob.vmem
 deep_learning_layer/data/glove.6B.50d.txt
 deep_learning_layer/data/saved_model.h5
+*.pyc
