@@ -15,4 +15,4 @@ jajaja! ok ok suerte nos hablamos
 'Dialog window won\'t close after update',
 'Cursor disappears when selecting multiple options',
 'Cannot regain focus after clicking outside window',
-'I do not love you any more',
+'because I don't love you any more',
