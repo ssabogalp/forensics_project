@@ -198,32 +198,27 @@ if args.lsy:
 if not lang=='en':
     print("WARNING: Since a language different from english was chosen, the strings on that lanague \
 will be output and the program will terminate")
-
-#DETERMINE LANGUAGE OF EACH SENTENCE.
-
-if not lang=='en':
     exit()
 
+#OBTAIN STRINGS WITH THE OFFSET IN THE FILE
 strings_with_offset=get_strings_with_offset(args.file_path)
 
+#MATCH BY SYNONYM
 if args.s:
     get_string_matches(strings_with_offset, args.query)
 
+#DETERMINE LANGUAGE OF EACH SENTENCE.
 strings_in_lang, strings_in_lang_with_offset = get_language_strings(lang, strings_with_offset)
 
-print(strings_in_lang)
-print(strings_in_lang_with_offset)
-#TFIDF THING
-model, index, dictio=get_tfidf_model(strings_in_lang)
-#top_k=3
-#results=toptexts(model[corpus_list[0]], range(len(texts)),index, top_k)
+#TFIDF
+model, index, dictio = get_tfidf_model(strings_in_lang)
 
-
+#OBTAIN RESULTS
 results=toptexts(model[dictio.doc2bow(create_bow(args.query))], range(len(strings_in_lang)),index, max_results)
 
-print(create_bow(args.query))
+#PRINT RESULTS
 for r in results:
     print(r)
-    # if r[1] <= 0:
-    #     break
+    if r[1] <= 0:
+        break
     print(strings_in_lang_with_offset[r[0]])
