@@ -11,3 +11,7 @@ sudo apt-get install sklearn
 
 ## Usage:
 
+## thoughts
+
+left stopwords
+match exact synonyms combinatorix

@@ -4,7 +4,7 @@ import subprocess
 from nltk.corpus import wordnet
 import nltk
 from gensim.utils import lemmatize,toptexts
-from gensim.corpora.dictionary import Dictionary 
+from gensim.corpora.dictionary import Dictionary
 from gensim import similarities
 import gensim
 from gensim.models import TfidfModel
@@ -37,16 +37,15 @@ def print_synonyms(lang):
     #we eliminate duplicated spaces with split() and join(), then we split by space
     words_query= ' '.join(args.query.strip().split()).split(" ")
     if lang=='en':
-        print("SYNONYMS:")
+        print("\nSYNONYMS:*******************************")
         for word in words_query:
             print("for word '"+word+"':")
             synonyms = []
             for syn in wordnet.synsets(word):
                 for l in syn.lemmas():
                     synonyms.append(l.name())
-                    
+
             print(",".join(synonyms))
-            print("")#line break
     else:
         print("WARNING: synonyms can only be found in english language")
 
@@ -70,14 +69,14 @@ def get_language_strings(lang, strings_with_offset):
             #get the string withouth offset at the beginning and make it lower case
             string_no_offset= string_offset.split(" ",1)[1].lower()
             #only take letters and spaces from string
-            string_no_offset= ''.join(x for x in string_no_offset if x.isalpha() or x==' ') 
+            string_no_offset= ''.join(x for x in string_no_offset if x.isalpha() or x==' ')
             if len(string_no_offset.split(" "))<3:
                 continue
             try:
-                print(string_no_offset)
+                #print(string_no_offset)
                 if lang==detect(string_no_offset):
-                    print(string_no_offset)
-                    strings_in_lang_with_offset.append(string_offset) 
+                    #print(string_no_offset)
+                    strings_in_lang_with_offset.append(string_offset)
                     out_lang_file.write(string_offset+"\n")
                     strings_in_lang.append(string_no_offset)
             except Exception:
@@ -87,14 +86,17 @@ def get_language_strings(lang, strings_with_offset):
 def get_string_matches(strings_with_offset, word):
     matches=[]
     found=False
+    print("\nSYNONYM EXACT MATCHES:******************")
     for string in strings_with_offset:
         for syn in wordnet.synsets(word):
             for l in syn.lemmas():
-                if l.name() in string:
+                # print(l)
+                # print(" ".join(l.name().split("_")))
+                if " ".join(l.name().split("_")) in string:
                     matches.append(string)
                     print(string)
-                found=True
-                break
+                    found=True
+                    break
             if found:
                 found=False
                 break
@@ -109,29 +111,30 @@ def create_bow(text):
 
     For using wordnet, I installed nltk using
     sudo pip3 install nltk
-    then I downloaded word net running 
+    then I downloaded word net running
     nltk.download()
     and storing wordnet in home directory. I also downloaded
     punkt from packages, to be able to use word tokenizer,
     and stopwords from package.
 
     Input: str type consisting of a sentence or paragraph
-    
+
     Ouput: a list of words that have been pre-processed using stopwords,
      stemming, and lemmatization
     """
     # In dictionary, VB verb base, NN common noun, etc, see
     # https://sites.google.com/site/partofspeechhelp/home/nn_vb
-    
+
     #TOKENIZE
     word_list=nltk.word_tokenize(text)
-    #STOPWORDS
-    text_no_stop = [word for word in word_list 
+    #STOPWORDS REMOVE
+    text_no_stop = [word for word in word_list
             if word not in nltk.corpus.stopwords.words('english')]
+
     #LEMMATIZE
     wn_lem=[]
     for word in text_no_stop:
-        wn_lem.append(nltk.stem.WordNetLemmatizer().lemmatize(word)) 
+        wn_lem.append(nltk.stem.WordNetLemmatizer().lemmatize(word))
     #STEMMING
     porter_stemmer = nltk.stem.porter.PorterStemmer()
     stem_lem_text=[]
@@ -144,20 +147,19 @@ def get_tfidf_model(strings_in_lang):
     for text in strings_in_lang:
         words=[]
         for word in create_bow(text):
-            # lematization from create bow does not return a string, 
+            # lematization from create bow does not return a string,
             # but bytes, so it is decode as utf-8 string
             words.append(word)
         sentences.append(words)
     dictio=Dictionary(sentences)
     corpus_list=[]
     for idx, sentence in enumerate(sentences):
-        # doc2bow converts a list of stems into pairs of 
-        # (index_corpus,count_sentence)   
+        # doc2bow converts a list of stems into pairs of
+        # (index_corpus,count_sentence)
         corpus_list.append(dictio.doc2bow(sentence))
-        #print(corpus_list[idx])
     # fits a model from a list of bows (from doc2bow each item)
     model = TfidfModel(corpus_list)
-    # applies the model to all the elements in the corpus, to convert pairs (int, int), 
+    # applies the model to all the elements in the corpus, to convert pairs (int, int),
     # so the second element in the pair, which in the corpus was the term frequency, now
     # becomes a float that is the result of a function of the term frequency
     corp_tfidf=[]
@@ -167,58 +169,60 @@ def get_tfidf_model(strings_in_lang):
     index=similarities.MatrixSimilarity(corp_tfidf)
     return model, index, dictio
 
+def print_results(results):
+    print("\nTFIDF MATCHES:**************************")
+    for r in results:
+        if r[1] <= 0:
+            break
+        print(strings_in_lang_with_offset[r[0]])
+
+if __name__ == "__main__":
+    # PARSE ARGUMENTS
+    args = parse_arguments()
+    # ASSIGN DEFAULTS. Note: defaults (with string this could be set in add_argument,
+    # but since we have different object I did it all here)
+    lang=None
+    if args.lang:
+        lang=args.lang
+    else:
+        lang='en'
+    out_lang_file=None
+    if args.out:
+        out_lang_file=open(args.out, 'w')
+    else:
+        out_lang_file=open('out_lang_strings.txt', 'w')
+    max_results=None
+    if args.max:
+        max_results=args.max
+    else:
+        max_results=30
+
+    #PRINT SYNONYMS
+    if args.lsy:
+        print_synonyms(lang)
 
 
+    #IF NOT IN ENGLISH UNTIL HERE, TERMINATE PROGRAM
+    if not lang=='en':
+        print("WARNING: Since a language different from english was chosen, the strings on that lanague \
+    will be output and the program will terminate")
+        exit()
 
-args = parse_arguments()
-#Assign defaults (with string this could be set in add_argument, but since we have different object
-# I did it all here)
-lang=None
-if args.lang:
-    lang=args.lang
-else:
-    lang='en'
-out_lang_file=None
-if args.out:
-    out_lang_file=open(args.out, 'w')
-else:
-    out_lang_file=open('out_lang_strings.txt', 'w')
-max_results=None
-if args.max:
-    max_results=args.max
-else:
-    max_results=30 
+    #OBTAIN STRINGS WITH THE OFFSET IN THE FILE
+    strings_with_offset=get_strings_with_offset(args.file_path)
 
-#PRINT SYNONYMS
-if args.lsy:
-    print_synonyms(lang)
+    #MATCH BY SYNONYM
+    if args.s:
+        get_string_matches(strings_with_offset, args.query)
 
+    #DETERMINE LANGUAGE OF EACH SENTENCE.
+    strings_in_lang, strings_in_lang_with_offset = get_language_strings(lang, strings_with_offset)
 
+    #TFIDF
+    model, index, dictio = get_tfidf_model(strings_in_lang)
 
-if not lang=='en':
-    print("WARNING: Since a language different from english was chosen, the strings on that lanague \
-will be output and the program will terminate")
-    exit()
+    #OBTAIN RESULTS
+    results=toptexts(model[dictio.doc2bow(create_bow(args.query))], range(len(strings_in_lang)),index, max_results)
 
-#OBTAIN STRINGS WITH THE OFFSET IN THE FILE
-strings_with_offset=get_strings_with_offset(args.file_path)
-
-#MATCH BY SYNONYM
-if args.s:
-    get_string_matches(strings_with_offset, args.query)
-
-#DETERMINE LANGUAGE OF EACH SENTENCE.
-strings_in_lang, strings_in_lang_with_offset = get_language_strings(lang, strings_with_offset)
-
-#TFIDF
-model, index, dictio = get_tfidf_model(strings_in_lang)
-
-#OBTAIN RESULTS
-results=toptexts(model[dictio.doc2bow(create_bow(args.query))], range(len(strings_in_lang)),index, max_results)
-
-#PRINT RESULTS
-for r in results:
-    print(r)
-    if r[1] <= 0:
-        break
-    print(strings_in_lang_with_offset[r[0]])
+    #PRINT RESULTS
+    print_results(results)

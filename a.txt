@@ -15,4 +15,6 @@ jajaja! ok ok suerte nos hablamos
 'Dialog window won\'t close after update',
 'Cursor disappears when selecting multiple options',
 'Cannot regain focus after clicking outside window',
+I love this settings
 'because I don't love you any more',
+Because we can have a go at it

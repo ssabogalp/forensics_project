@@ -11,3 +11,6 @@ b"1dd 'Font size cannot be changed after save',"
 b"207 'Dialog window won\\'t close after update',"
 b"232 'Cursor disappears when selecting multiple options',"
 b"267 'Cannot regain focus after clicking outside window',"
+b'29c I love this settings'
+b"2b1 'because I don't love you any more',"
+b'2d6 Because we can have a go at it'
