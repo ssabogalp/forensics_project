@@ -56,7 +56,14 @@ def sentences_to_indices(X, word_to_index, max_len):
         for w in text_words:
             # Set the (i,j)th entry of X_indices to the index of the 
             # correct word.
-            X_indices[i, j] = word_to_index[w]
+            #if w in word_to_index:
+            try:
+                idx=word_to_index[w]
+                X_indices[i, j] = idx
+            except:
+                pass #word skip because is not in the embeddings, would not apport anything anyway
+            # else:
+            #     continue
             j = j + 1
     return X_indices
 

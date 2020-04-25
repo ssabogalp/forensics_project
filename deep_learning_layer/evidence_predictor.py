@@ -10,9 +10,14 @@ from keras.layers.embeddings import Embedding
 from keras.preprocessing import sequence
 from keras.initializers import glorot_uniform
 from keras.models import load_model
+import os
+
 
 
 trained_datasets_path = 'deep_learning_layer/data/saved_model'
+
+#Disable messages from keras about gpu etc
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
 class EvidencePredictor(object):
     """ Recurrent Neural Network that can be trained with a small dataset, 

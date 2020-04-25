@@ -47,7 +47,6 @@ def get_language_strings(lang, strings_with_offset, out_lang_file):
             if len(string_no_offset.split(" "))<3:
                 continue
             try:
-                #print(string_no_offset)
                 if lang==detect(string_no_offset):
                     #print(string_no_offset)
                     strings_in_lang_with_offset.append(string_offset)
@@ -58,7 +57,7 @@ def get_language_strings(lang, strings_with_offset, out_lang_file):
     out_lang_file.close()
     return strings_in_lang, strings_in_lang_with_offset
 
-def get_string_matches(strings_with_offset, word):
+def get_string_matches_syn(strings_with_offset, word):
     """ Filter strings  by an exact match with a list of synonyms obtained from a word
     
     Arguments:

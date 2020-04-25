@@ -9,7 +9,6 @@ from gensim.models import TfidfModel
 import sys
 
 
-
 def create_bow(text):
     """ Returns an list of preporcessed words in bytes, according to:
     Gensim stop list, 2) has a length > 3 characters, 3) is lemmatized

@@ -5,9 +5,14 @@ from lang_layer.lang import *
 from tfidf_layer.tfid import *
 from deep_learning_layer.evidence_predictor import EvidencePredictor
 from deep_learning_layer.utils import *
+
 #IMPORTANT: remember to download wordnet using nltk.download() after installing the dependencies
 
 #MAX_WIDTH_OF_100_IN_LINE_OF_CODE_12345678901234567890123456789012345678901234567890123456789012345
+ 
+
+SIMILARITY_THRESHOLD=0.3
+MAX_WORDS=15
 
 def parse_arguments():
     """ Parses arguments that the used can give the program for different results
@@ -29,7 +34,7 @@ def parse_arguments():
     parser.add_argument("-M",'--max',  help='max results returned')
     parser.add_argument('-s', action='store_true',help="Search using exact match for synonyms \
         of a word  in --query.")
-    parser.add_argument('-lsy', action='store_true',help="list synonyms of each word in --query")
+    parser.add_argument('--lsy', action='store_true',help="list synonyms of each word in --query")
     parser.add_argument("-V", "--version", help="show program version", action="store_true")
     parser.add_argument("-P", "--predict", help="make predictions according previously trained dataset", action="store_true")
     parser.add_argument("-T", "--train", help="train dataset passed in this argument")
@@ -65,15 +70,17 @@ if __name__ == "__main__":
     if args.train:
         pre=EvidencePredictor()
         #"data/abuse.csv"
-        pre.train(2,10,args.train)
+        pre.train(2,MAX_WORDS,args.train)
     
-    if args.predict:
-        pre=EvidencePredictor()
-        print(c.predict("lets fuck her",10))
 
-    #PRINT SYNONYMS
-    if args.lsy:
-        print_synonyms(lang, args.query)
+
+    #OBTAIN STRINGS WITH THE OFFSET IN THE FILE
+    strings_with_offset=get_strings_with_offset(args.file_path)
+
+    #DETERMINE LANGUAGE OF EACH SENTENCE.
+    strings_in_lang, strings_in_lang_with_offset = get_language_strings(
+        lang, strings_with_offset, out_lang_file)
+    print("STRINGS IN THE DEFAULT/CHOSEN LANGUAGE OUTPUT TO THE FILE SUCCESSFULY")
 
     #IF NOT IN ENGLISH UNTIL HERE, TERMINATE PROGRAM
     if not lang=='en':
@@ -81,23 +88,37 @@ if __name__ == "__main__":
     will be output and the program will terminate")
         exit()
 
-    #OBTAIN STRINGS WITH THE OFFSET IN THE FILE
-    strings_with_offset=get_strings_with_offset(args.file_path)
+    #PRINT SYNONYMS
+    if args.lsy:
+        print_synonyms(lang, args.query)
+        if not args.s:
+            print("\nSince argument '-s' is missing, only the synonym list will be \
+        printed and the program will terminate")
+            exit()
 
     #MATCH BY SYNONYM
     if args.s:
-        get_string_matches(strings_with_offset, args.query)
+        get_string_matches_syn(strings_with_offset, args.query)
+        exit()
 
-    #DETERMINE LANGUAGE OF EACH SENTENCE.
-    strings_in_lang, strings_in_lang_with_offset = get_language_strings(
-        lang, strings_with_offset, out_lang_file)
+    #DEEP LEARNING TRAINING
+    if args.predict:
+        pre=EvidencePredictor()
+        print("\nDEEP LEARNING***************************")
+        #print(pre.predict("we can attack when she gets off in the bus stop",MAX_WORDS))
+        for string in strings_in_lang:
+            vector=pre.predict(string,MAX_WORDS)
+            if vector[0][1]>SIMILARITY_THRESHOLD:
+                print(vector)
+                print(string)
 
     #TFIDF
     model, index, dictio = get_tfidf_model(strings_in_lang)
 
     #OBTAIN RESULTS
-    results=toptexts(
-        model[dictio.doc2bow(create_bow(args.query))], range(len(strings_in_lang)),index, max_results)
+    if args.query:
+        results=toptexts(
+            model[dictio.doc2bow(create_bow(args.query))], range(len(strings_in_lang)),index, max_results)
 
-    #PRINT RESULTS
-    print_results(results, strings_in_lang_with_offset)
+        #PRINT RESULTS
+        print_results(results, strings_in_lang_with_offset)
