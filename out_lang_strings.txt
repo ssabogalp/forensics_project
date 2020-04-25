@@ -12,4 +12,5 @@ db 'Window resize changes the default settings',
 232 'Cursor disappears when selecting multiple options',
 267 'Cannot regain focus after clicking outside window',
 29c I love this settings
+2b1 'because I don't love you any more',
 2d6 Because we can have a go at it

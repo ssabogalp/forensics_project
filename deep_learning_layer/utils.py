@@ -99,22 +99,6 @@ def softmax(x):
     e_x = np.exp(x - np.max(x))
     return e_x / e_x.sum()
 
-# def delete_dataset(dataset_id):
-#     """
-#     Deletes all info related to a dataset.
-    
-#     Arguments:
-#     filename -- the path of glove file
-#     """
-#     try:
-#         TrainingExample.objects.filter(dataset_id=dataset_id).delete()
-#         Dataset.objects.filter(id=dataset_id).delete()
-#     #An exception should not happen here, but this method is called
-#     #inside except in views, so need to make sure preventing an exception
-#     #is shown to the user.
-#     except Exception as exception:
-#         logging.exception("Unexpected exception has occurred")
-
 def read_csv_multitask(filename):
     """ Reads a file that contains in each line a sentence with its 
     respective labels.
@@ -140,16 +124,24 @@ def read_csv_multitask(filename):
     return X, labels 
 
 def read_csv(filename = 'data/emojify_data.csv'):
+    """
+    Reads CVS that has two columns, the first one with the string and the second
+    one with the label
+
+    Return X,Y which are the string vectorized and the labels
+    """
     phrase = []
     label = []
+    try:
+        with open (filename) as csvDataFile:
+            csvReader = csv.reader(csvDataFile)
 
-    with open (filename) as csvDataFile:
-        csvReader = csv.reader(csvDataFile)
-
-        for row in csvReader:
-            phrase.append(row[0])
-            label.append(row[1])
-
+            for row in csvReader:
+                phrase.append(row[0])
+                label.append(row[1])
+    except:
+        print("File not found, verify the path you input for training. Terminating program...")
+        exit()
     X = np.asarray(phrase)
     Y = np.asarray(label, dtype=int)
 

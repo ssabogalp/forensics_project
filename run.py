@@ -3,7 +3,8 @@ import sys
 from strings_layer.strings_util import *
 from lang_layer.lang import *
 from tfidf_layer.tfid import *
-
+from deep_learning_layer.evidence_predictor import EvidencePredictor
+from deep_learning_layer.utils import *
 #IMPORTANT: remember to download wordnet using nltk.download() after installing the dependencies
 
 #MAX_WIDTH_OF_100_IN_LINE_OF_CODE_12345678901234567890123456789012345678901234567890123456789012345
@@ -30,6 +31,8 @@ def parse_arguments():
         of a word  in --query.")
     parser.add_argument('-lsy', action='store_true',help="list synonyms of each word in --query")
     parser.add_argument("-V", "--version", help="show program version", action="store_true")
+    parser.add_argument("-P", "--predict", help="make predictions according previously trained dataset", action="store_true")
+    parser.add_argument("-T", "--train", help="train dataset passed in this argument")
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -57,6 +60,16 @@ if __name__ == "__main__":
         max_results=args.max
     else:
         max_results=30
+
+    #TRAIN
+    if args.train:
+        pre=EvidencePredictor()
+        #"data/abuse.csv"
+        pre.train(2,10,args.train)
+    
+    if args.predict:
+        pre=EvidencePredictor()
+        print(c.predict("lets fuck her",10))
 
     #PRINT SYNONYMS
     if args.lsy:

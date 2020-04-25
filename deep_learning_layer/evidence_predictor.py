@@ -2,7 +2,7 @@
 #TODOS: show graph in training
 #
 
-from utils import *
+from .utils import *
 import numpy as np
 from keras.models import Model
 from keras.layers import Dense, Input, Dropout, LSTM, Activation
@@ -12,13 +12,13 @@ from keras.initializers import glorot_uniform
 from keras.models import load_model
 
 
-trained_datasets_path = 'data/saved_model'
+trained_datasets_path = 'deep_learning_layer/data/saved_model'
 
-class ControlPredictor(object):
+class EvidencePredictor(object):
     """ Recurrent Neural Network that can be trained with a small dataset, 
     because it uses a previously trained word embeddings
     """
-
+    model=None
     def pretrained_embedding_layer(self, word_to_vec_map, word_to_index):
         """
         Creates a Keras Embedding() layer and loads in pre-trained GloVe 
@@ -62,7 +62,7 @@ class ControlPredictor(object):
         return embedding_layer
 
 
-    def create_model(self, input_shape, word_to_vec_map, word_to_index):
+    def create_model(self, input_shape, word_to_vec_map, word_to_index, output_units):
         """
         Creates the keras model
         
@@ -72,6 +72,7 @@ class ControlPredictor(object):
             into its 50-dimensional vector representation
         word_to_index -- dictionary mapping from words to their indices in
             the vocabulary(400,001 words)
+        output_units -- how many classes you are predicting
 
         Returns:
         model -- a model instance in Keras
@@ -101,35 +102,38 @@ class ControlPredictor(object):
         X = Dropout(0.5, noise_shape=None, seed=None)(X)
         # softmax is replaced by sigmoid, because two elements can have 0.9
         # probabilit, for instance, it is not needed normalization
-        X = Dense(units =5, activation="softmax")(X)
+        X = Dense(units =output_units, activation="softmax")(X)
         # Add a softmax activation
         X = Activation('softmax')(X)
         # Create Model instance which converts sentence_indices into X.
         model = Model(inputs = sentence_indices, outputs=X,
-            name='ControlPredictor') 
+            name='EvidencePredictor') 
         return model
 
-    def train(self, number_outputs, max_num_words):
-        """ Trains a model based on a dataset  
+    def train(self, number_outputs, max_num_words, filename = 'data/emojify_data.csv'):
+        """ Trains an RNN model  with default parameters that were tested for best performance
+        at April 2020, see details in create_model
 
         Arguments:
-            id_dataset -- the id of the dataset that will be trained
+            -- number_outputs
+            -- max_num_words
         
         Returns:
             accuracy -- 
         """
-        X_train, Y_train = read_csv()
+        X_train, Y_train = read_csv(filename)
         X_train_indices = sentences_to_indices(X_train, word_to_index,
             max_num_words)
         Y_train_oh = convert_to_one_hot(Y_train, C = number_outputs)
         model = self.create_model((max_num_words,), word_to_vec_map,
-            word_to_index)
+            word_to_index, number_outputs)
         model.summary()
         model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.fit(X_train_indices, Y_train_oh, epochs = 50, batch_size = 32,
             shuffle=True)
         model.save(trained_datasets_path+'.h5')
         self.model=model
+        print("Model succesfully trained\n")
         return model
 
     def predict(self, text_sample, max_num_words):
@@ -153,14 +157,3 @@ class ControlPredictor(object):
             word_to_index, max_len = max_num_words)
         return model.predict( indices_text )
     
-
-
-#**************************
-#Additional comments
-#**************************
-# To add new classes, modfiy C=5  in five parts. remover commas and quotes form text.
-# Change  numver in X1_indices = sentences_to_indices(X1,word_to_index, max_len = 5    
-# Change X = Dense(units =5, activation="softmax")(X)  
-#
-# If a requirement outputs more than one control, you could get the elemtns with more probability. 
-# Or, you have to make your labels for multitask learning.
